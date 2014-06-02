@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+# encoding: UTF-8
+
 require 'open-uri'
 require 'nokogiri'
 require 'prawn'
@@ -28,15 +30,65 @@ open(url) do |f|
 		}
 	end
 
-	pdf.text eventinfo[:title]
-	pdf.text eventinfo[:subtitle]
-	pdf.text eventinfo[:venue]
-	pdf.text eventinfo[:city]
-
+	first_page = true
 	xml.xpath('/schedule/day').map do |day|
+
 		day.xpath('./room').map do |room|
-			pdf.start_new_page
-			pdf.text day['date']+' '+room['name']
+			pdf.start_new_page unless first_page
+			first_page = false
+			start_page = pdf.page_number
+			pdf.font_size(14)
+
+			tablecontent = [
+				['#', 'Time', 'Speaker', 'Title', 'Signature']
+			]
+
+			room.xpath('./event').map do |event|
+				tablecontent.push([
+					event['id'],
+					event.xpath('start').text,
+					event.xpath('persons/person').map { |person| person.text }.join(', '),
+					event.xpath('title').text,
+					{:content => "", :borders => [:top, :bottom, :left]}
+				])
+			end
+
+			pdf.bounding_box([0, pdf.bounds.top - 140], :width => pdf.bounds.width) do
+				pdf.table(
+					tablecontent,
+					:header => true,
+					:column_widths => [30, 50, 150, 339, 200]
+				) do |table|
+					table.cells.height = 60
+					table.cells.padding = [10, 5]
+
+					table.columns(0..3).borders = [:top, :bottom]
+					table.columns(4).borders = [:top, :bottom, :left]
+
+					table.rows(0).font_style = :bold
+				end
+			end
+
+			end_page = pdf.page_number
+			n_pages = end_page - start_page + 1
+			pdf.repeat(start_page..end_page, :dynamic => true) do
+				pdf.move_cursor_to pdf.bounds.top
+				pdf.font_size(25) do
+					pdf.text eventinfo[:title]+" – Video Release Form"
+				end
+
+				pdf.font_size(20) do
+					pdf.text 'Day '+day['index']+' – '+day['date']+' – '+room['name']+' – Page '+(pdf.page_number - start_page + 1).to_s+' of '+n_pages.to_s
+				end
+
+				pdf.pad_top(15) do
+					pdf.text \
+						"I/We, the undersigned, agree that <b>video footage of my talk</b> at the "+eventinfo[:title]+" "+
+						"conference may be <b>broadcast, recorded, published, and archived</b> by the conference "+
+						"organisers. Publication will be under the <b>Creative Commons Attribution "+
+						"Share-Alike 3.0 (unported) license</b>.", :inline_format => true, :align => :justify
+				end
+			end
 		end
 	end
 
