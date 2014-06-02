@@ -48,6 +48,9 @@ open(url) do |f|
 	# iterate through all days and all rooms
 	xml.xpath('/schedule/day').map do |day|
 		day.xpath('./room').map do |room|
+			# don't add a page for this room if there are no events on that day
+			next if room.xpath('./event').length == 0
+
 			# add a page-break unless we're on the first page
 			pdf.start_new_page unless first_page
 			first_page = false
