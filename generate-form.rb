@@ -78,7 +78,7 @@ open(url) do |f|
 				end
 
 				pdf.font_size(20) do
-					pdf.text 'Day %d [<i>%s</i>] – %s       Page %d of %d' % 
+					pdf.text 'Day %d <i>(%s)</i>, %s – Page %d of %d' % 
 						[day['index'], day['date'], room['name'], (pdf.page_number - start_page + 1), n_pages],
 						:inline_format => true
 				end
