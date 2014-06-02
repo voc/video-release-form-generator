@@ -16,6 +16,10 @@ require 'prawn'
 if ARGV.length < 1 then
 	$stderr.puts "call with schedule-xml url and pipe output to a pdf-file like this:"
 	$stderr.puts "  ./generate-form.rb http://sotm-eu.org/export.xml > sotmeu14-form.pdf"
+	$stderr.puts
+	$stderr.puts "optionally add a room filter"
+	$stderr.puts "  ./generate-form.rb http://www.fossgis.de/konferenz/2014/programm/schedule.de.xml H1 H2 H3 > fossgis14-form.pdf"
+	$stderr.puts
 	exit
 end
 
