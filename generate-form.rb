@@ -15,7 +15,7 @@ require 'prawn'
 # test for required argument
 if ARGV.length < 1 then
 	$stderr.puts "call with schedule-xml url and pipe output to a pdf-file like this:"
-	$stderr.puts "  ./generate-form.rb http://sotm-eu.org/export.xml > sotm-eu-form.pdf"
+	$stderr.puts "  ./generate-form.rb http://sotm-eu.org/export.xml > sotmeu14-form.pdf"
 	exit
 end
 
