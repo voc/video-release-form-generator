@@ -19,8 +19,17 @@ if ARGV.length < 1 then
 	exit
 end
 
-# extract the url, download and open it
-url = ARGV[0]
+# extract the url
+url = ARGV.shift
+
+# interpret remaining arguments as room-filter
+rooms = ARGV
+$stderr.puts "room-filter active: ["+rooms.join(', ')+']' if not rooms.empty?
+
+# convert room names to uppercase
+rooms.map!(&:upcase)
+
+# download and open it
 open(url) do |f|
 	# parse the resulting xml
 	xml = Nokogiri::XML(f)
@@ -50,6 +59,9 @@ open(url) do |f|
 		day.xpath('./room').map do |room|
 			# don't add a page for this room if there are no events on that day
 			next if room.xpath('./event').length == 0
+
+			# skip if a room-filter is present and the room is not in that filter
+			next if not rooms.empty? and not rooms.include?(room['name'].upcase)
 
 			# add a page-break unless we're on the first page
 			pdf.start_new_page unless first_page
